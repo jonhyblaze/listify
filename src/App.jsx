@@ -1,28 +1,14 @@
-import { useState, Fragment } from "react";
+import List from "./components/List";
+import Login from "./components/Login";
+import Onboarding from "./components/Onboarding";
 
 function App() {
-  const [count, setCount] = useState(0);
-  const [list, setList] = {};
-
   return (
-    <Fragment>
-      <h1 className="max-w-[575px] self-center text-3xl font-bold underline">
-        Hello world!
-      </h1>
-      <h2>The counter value is: {count}</h2>
-      <button
-        className="px-10 text-3xl"
-        onClick={() => setCount((prev) => prev + 1)}
-      >
-        +
-      </button>
-      <button
-        className="px-10 text-3xl"
-        onClick={() => setCount((prev) => prev - 1)}
-      >
-        -
-      </button>
-    </Fragment>
+    <main className="grid min-h-screen">
+      <Onboarding>
+        <Login />
+      </Onboarding>
+    </main>
   );
 }
 
