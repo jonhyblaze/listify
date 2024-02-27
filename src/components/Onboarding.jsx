@@ -1,12 +1,8 @@
 import Button from "./UI/Button";
+import { useNavigate } from "react-router-dom";
 
-const Onboarding = ({ setIsFirstTimeUser }) => {
-  const finishOnboarding = () => {
-    if (!JSON.parse(localStorage.getItem("firstTimeUser"))) {
-      localStorage.setItem("firstTimeUser", false);
-      setIsFirstTimeUser && setIsFirstTimeUser(false);
-    }
-  };
+const Onboarding = () => {
+  const navigate = useNavigate();
 
   return (
     <main className="grid h-full gap-y-0 bg-zinc-700 text-white">
@@ -14,7 +10,10 @@ const Onboarding = ({ setIsFirstTimeUser }) => {
         <h1 className="gradient-text text-2xl font-bold">
           Wellcome to listify, we are trilled to have yoy onboard!
         </h1>
-        <Button onClick={finishOnboarding} className="bg-white text-black">
+        <Button
+          onClick={() => navigate("/login")}
+          className="bg-white text-black"
+        >
           Continue
         </Button>
       </section>
