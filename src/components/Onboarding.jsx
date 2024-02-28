@@ -8,7 +8,7 @@ const Onboarding = () => {
     <main className="grid h-full gap-y-0 bg-zinc-700 text-white">
       <section className="flex flex-col gap-3 self-center px-10">
         <h1 className="gradient-text text-2xl font-bold">
-          Wellcome to listify, we are trilled to have yoy onboard!
+          Wellcome to listify, we are trilled to have you onboard!
         </h1>
         <Button
           onClick={() => navigate("/login")}

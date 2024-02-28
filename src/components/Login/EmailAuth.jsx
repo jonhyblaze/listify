@@ -1,62 +1,47 @@
 import { useState } from "react";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
+import useAuth from "../../hooks/useAuth";
 import Button from "../UI/Button";
 import { useNavigate } from "react-router-dom";
 
 const EmailAuth = () => {
   const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
   const [isRegistered, setIsRegistered] = useState(true);
   const navigate = useNavigate();
+  const { signIn, signUp } = useAuth();
 
   const toggleAuth = () => {
     setIsRegistered((prev) => !prev);
   };
 
-  const handleSignIn = (e) => {
+  const handleSignIn = async (e) => {
     // Handle sign-in logic here
     e.preventDefault();
-    const auth = getAuth();
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
-
-        console.log("SignIn Succesfull");
+    try {
+      const login = await signIn(email, password);
+      if (login) {
         navigate("/listview");
-        // ...
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log("SignIn went wrong", errorCode, errorMessage);
-      });
+      }
+    } catch (e) {
+      console.error(e.message, e.code);
+    }
   };
 
-  const handleSignUp = (e) => {
-    // Handle sign-up logic here
+  const handleSignUp = async (e) => {
     e.preventDefault();
-    const auth = getAuth();
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed up
-        const user = userCredential.user;
-        console.log("SignUp Succesfull");
-        // ...
+    const userName = `${firstName} ${lastName}` || "Username";
 
+    try {
+      const registration = await signUp(email, password, userName);
+      if (registration) {
         navigate("/listview");
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log("Signup went wrong", errorCode, errorMessage);
-        // ..
-      });
+      }
+    } catch (e) {
+      console.log(e.code, e.message);
+    }
   };
 
   return (
@@ -75,27 +60,56 @@ const EmailAuth = () => {
           <path d="M0 0h24v24H0z" fill="none" />
         </svg>
       </div>
-      <div className="flex h-screen flex-col items-center justify-center text-white">
-        <h1 className="mb-4 text-2xl font-bold">Login to Listify</h1>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mb-2 w-64 rounded border px-3 py-2 text-black"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mb-4 w-64 rounded border px-3 py-2 text-black"
-        />
+      <form
+        action="submit"
+        className="mx-auto flex h-screen  flex-col items-center justify-center text-white"
+      >
+        <h1 className="mb-4 text-2xl font-bold">{`${isRegistered ? "Login" : "Sign up"} to Listify`}</h1>
+        {!isRegistered ? (
+          <div className=" mx-16 inline-flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="First Name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="mb-2 w-3/6 rounded border px-3 py-2 text-black"
+            />
+            <input
+              type="text"
+              placeholder="Last Name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="mb-2 w-3/6  rounded border px-3 py-2 text-black"
+            />
+          </div>
+        ) : (
+          ""
+        )}
+
+        <div className="mx-16">
+          <input
+            type="email"
+            placeholder="Email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="mb-2 w-full rounded border px-3 py-2 text-black"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="mb-4 w-full rounded border px-3 py-2 text-black"
+          />
+        </div>
+
         {isRegistered ? (
           <>
             <Button
               onClick={handleSignIn}
-              className="mb-2 w-64 rounded border px-4 py-2"
+              className="mb-2 w-[66%]  rounded border px-4 py-2"
             >
               Sign In
             </Button>
@@ -108,7 +122,7 @@ const EmailAuth = () => {
           <>
             <Button
               onClick={handleSignUp}
-              className="mb-2 w-64 rounded border px-4 py-2"
+              className="mb-2 w-[66%] rounded border px-4 py-2"
             >
               Sign Up
             </Button>
@@ -118,7 +132,7 @@ const EmailAuth = () => {
             </div>
           </>
         )}
-      </div>
+      </form>
     </>
   );
 };

@@ -9,12 +9,10 @@ const StartUpHandler = () => {
   useEffect(() => {
     if (auth) {
       console.log(auth);
-
       navigate("/listview");
-    } else {
-      navigate("/");
     }
   }, [auth]);
+
   return null;
 };
 

@@ -3,7 +3,7 @@ import useAuth from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 const Sidebar = ({ toggleSidebar, isSidebarOn }) => {
-  const { signOut, auth } = useAuth();
+  const { signOut, auth, updateDisplayName } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = () => {
@@ -19,15 +19,23 @@ const Sidebar = ({ toggleSidebar, isSidebarOn }) => {
         console.log("SignOut went wrong", error.code, error.status);
       });
   };
+
+  const userName = auth?.displayName || "Unnamed User";
+  const userPic =
+    auth?.photoURL ||
+    "https://previews.123rf.com/images/elvie15veronika/elvie15veronika2005/elvie15veronika200500011/146300386-social-media-avatar-profile-a-young-man-portrait-of-an-arab-man-colorful-concept-vector-trendy.jpg";
+
   return (
     <section className=" absolute flex h-screen w-full">
       <div className=" h-full w-4/6 bg-white pl-4 pr-2 pt-4">
         <div className="flex items-center justify-between">
-          <h4 className="medium  text-xl">Pedro Lopez</h4>
+          <h4 className="medium text-xl">
+            {userName ? userName : "Pedro Lopez"}
+          </h4>
           <img
             width={48}
             className="rounded-full border border-black"
-            src="https://previews.123rf.com/images/elvie15veronika/elvie15veronika2005/elvie15veronika200500011/146300386-social-media-avatar-profile-a-young-man-portrait-of-an-arab-man-colorful-concept-vector-trendy.jpg"
+            src={userPic}
           />
         </div>
 
