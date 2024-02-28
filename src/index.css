@@ -59,3 +59,7 @@
         @apply font-geist-black;
     }
 }
+
+body {
+    @apply bg-zinc-700;
+}
