@@ -10,6 +10,8 @@ import {
 } from "firebase/auth";
 import firebaseApp from "../firebase/firebase";
 import { useState, useEffect } from "react";
+import { addDoc, collection } from "firebase/firestore";
+import db from "../firebase/firestore";
 
 function useAuth() {
   const [auth, setAuth] = useState(null);
@@ -39,7 +41,53 @@ function useAuth() {
       );
 
       const user = userCredential.user;
-      console.log("Signup Succesfull");
+      console.log("Signup Succesfull", user);
+
+      const docRef = await addDoc(collection(db, "users"), {
+        displayName: userName,
+        email,
+        uid: user.uid || null,
+        lists: [
+          {
+            name: "Bakery",
+            items: [
+              {
+                name: "baguette",
+                checked: true,
+                quantity: [2, "items"],
+              },
+              {
+                name: "bread",
+                checked: false,
+                quantity: [1, "items"],
+              },
+            ],
+          },
+          {
+            name: "Alcohol",
+            items: [
+              {
+                name: "beer",
+                checked: false,
+                quantity: [4, "items"],
+              },
+              {
+                name: "wine",
+                checked: false,
+                quantity: [1, "items"],
+              },
+              {
+                name: "vodka",
+                checked: true,
+                quantity: [0.5, "items"],
+              },
+            ],
+          },
+        ],
+      });
+
+      console.log("Document written with ID: ", docRef.id);
+
       setAuth(user);
 
       // Update display name immediately after successful registration

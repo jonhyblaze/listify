@@ -36,6 +36,7 @@ const EmailAuth = () => {
 
     try {
       const registration = await signUp(email, password, userName);
+
       if (registration) {
         navigate("/listview");
       }
@@ -46,7 +47,7 @@ const EmailAuth = () => {
 
   return (
     <>
-      <div onClick={() => navigate(-1)} className="p-4">
+      <div onClick={() => navigate("/login")} className="p-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="32"

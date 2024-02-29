@@ -4,7 +4,6 @@ import useAuth from "../hooks/useAuth";
 
 const Login = () => {
   const { googleSignIn } = useAuth();
-
   const navigate = useNavigate();
 
   const handleEmailAuth = () => {

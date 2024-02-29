@@ -1,7 +1,12 @@
 import Button from "./UI/Button";
 import Sidebar from "./Sidebar";
+import useDatabase from "../hooks/useDatabase";
+import { Fragment } from "react";
 
 const ListView = ({ isSidebarOn, toggleSidebar }) => {
+  const { database } = useDatabase();
+
+  console.log("Listview::::", database.lists);
   return (
     <>
       {isSidebarOn && <Sidebar toggleSidebar={toggleSidebar} />}
@@ -21,8 +26,21 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
           <h1 className="text-3xl ">My lists</h1>
         </div>
         <div className="grid gap-4 self-start ">
-          <ListItem name="Foods" activeNum={5} resolvedNum={8} />
-          <ListItem name="Goods" activeNum={3} resolvedNum={12} />
+          {database?.lists?.map((list, index) => {
+            let items = list.items.length;
+            let checkedItems = list.items.filter((item) => item.checked).length;
+            let uncheckedItems = items - checkedItems;
+
+            return (
+              <Fragment key={index}>
+                <ListItem
+                  name={list.name}
+                  activeNum={uncheckedItems}
+                  resolvedNum={items}
+                />
+              </Fragment>
+            );
+          })}
         </div>
         <Button className="black mb-4  place-self-end rounded-md border-2 px-4 py-0.5 uppercase">
           <div className="flex items-center gap-2">

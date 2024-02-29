@@ -8,7 +8,6 @@ const StartUpHandler = () => {
 
   useEffect(() => {
     if (auth) {
-      console.log(auth);
       navigate("/listview");
     }
   }, [auth]);

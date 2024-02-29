@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import List from "./components/List";
 import ListView from "./components/ListView";
 import Login from "./components/Login";
@@ -7,7 +7,6 @@ import UserContext from "./context/UserContext";
 import EmailAuth from "./components/Login/EmailAuth";
 import Sidebar from "./components/Sidebar";
 import StartUpHandler from "./components/StartUpHandler";
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
