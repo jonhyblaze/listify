@@ -50,9 +50,11 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
         </div>
         <div className="grid gap-2 self-start ">
           {database?.lists?.map((list, index) => {
-            let items = list.items.length;
-            let checkedItems = list.items.filter((item) => item.checked).length;
-            let uncheckedItems = items - checkedItems;
+            let items = Number(list.items.length);
+            let checkedItems = Number(
+              list.items.filter((item) => item.checked).length,
+            );
+            let uncheckedItems = Number(items - checkedItems);
 
             return (
               <Fragment key={index}>
@@ -60,6 +62,8 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
                   name={list.name}
                   activeNum={uncheckedItems}
                   resolvedNum={items}
+                  listLength={items}
+                  isEmpty={items === 0}
                 />
               </Fragment>
             );
@@ -107,7 +111,7 @@ const CreateMode = ({
 
         <div className="grid">
           <input
-            className="mb-2 rounded border px-3 py-2  text-black"
+            className="regular mb-2 rounded border px-3 py-2 text-black"
             type="text"
             placeholder="New list"
             value={newListName}
@@ -125,8 +129,8 @@ const CreateMode = ({
   );
 };
 
-const ListItem = ({ name, activeNum, resolvedNum }) => {
-  const statusBar = Math.round((activeNum / resolvedNum) * 100);
+const ListItem = ({ name, activeNum, resolvedNum, isEmpty }) => {
+  const statusBar = isEmpty ? 0 : Math.round((activeNum / resolvedNum) * 100);
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -221,6 +225,8 @@ ListItem.propTypes = {
   name: PropTypes.string.isRequired,
   activeNum: PropTypes.number.isRequired,
   resolvedNum: PropTypes.number.isRequired,
+  listLength: PropTypes.number.isRequired,
+  isEmpty: PropTypes.bool.isRequired,
 };
 ListView.propTypes = {
   isSidebarOn: PropTypes.bool.isRequired,
