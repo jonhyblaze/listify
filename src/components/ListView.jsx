@@ -33,14 +33,7 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
       {isSidebarOn && (
         <Sidebar toggleSidebar={toggleSidebar} isSidebarOn={isSidebarOn} />
       )}
-      <CreateMode
-        newListName={newListName}
-        setNewListName={setNewListName}
-        toggleCreateMode={toggleCreateMode}
-        handleCreateNewList={handleCreateNewList}
-        className={createModeOn ? " translate-y-0" : " translate-y-[100%]"}
-      />
-      <section className="bold grid h-full grid-rows-[20%,65%,15%] px-5 text-white">
+      <section className="bold relative grid h-full grid-rows-[20%,65%,15%] overflow-hidden px-5 text-white">
         <div className="mt-6 flex items-center gap-4 place-self-start">
           <aside className="cursor-pointer" onClick={toggleSidebar}>
             <svg
@@ -81,6 +74,13 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
             <span className="pt-[4px]">Add New List</span>
           </div>
         </Button>
+        <CreateMode
+          newListName={newListName}
+          setNewListName={setNewListName}
+          toggleCreateMode={toggleCreateMode}
+          handleCreateNewList={handleCreateNewList}
+          className={createModeOn ? " translate-y-0" : " translate-y-[100%]"}
+        />
       </section>
     </>
   );
@@ -95,7 +95,7 @@ const CreateMode = ({
 }) => {
   return (
     <div
-      className={`absolute bottom-0 flex w-full translate-y-0 flex-col rounded-md border-2 bg-zinc-700 transition duration-300 ease-in-out ${className}`}
+      className={`absolute bottom-0 flex w-full max-w-screen-sm translate-y-0 flex-col rounded-md border-2 bg-zinc-700 transition duration-300 ease-in-out ${className}`}
     >
       <div className="mx-8 my-2 grid gap-4 ">
         <h3 className="bold mt-2 inline-flex justify-between self-start text-2xl text-white">
@@ -232,6 +232,10 @@ CreateMode.propTypes = {
   className: PropTypes.string,
   toggleCreateMode: PropTypes.func.isRequired,
   handleCreateNewList: PropTypes.func.isRequired,
+};
+TooltipMenu.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  setIsOpen: PropTypes.func.isRequired,
 };
 
 export default ListView;

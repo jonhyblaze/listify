@@ -25,7 +25,7 @@ function App() {
   return (
     <UserContext.Provider value={{ theme: "dark" }}>
       <Router>
-        <main className="mx-auto flex h-screen max-w-screen-sm flex-col bg-zinc-700">
+        <main className="mx-auto flex h-screen max-w-screen-sm flex-col overflow-y-hidden bg-zinc-700">
           {isSidebarOn ? (
             <Sidebar toggleSidebar={toggleSidebar} isSidebarOn />
           ) : (

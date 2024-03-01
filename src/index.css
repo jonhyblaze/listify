@@ -38,6 +38,16 @@
     font-display: swap;
 }
 
+*::-webkit-scrollbar {
+    display: none;
+}
+html {
+    scrollbar-width: none; /* Firefox */
+}
+body {
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
 @layer base {
     .light {
         @apply font-geist-light;
