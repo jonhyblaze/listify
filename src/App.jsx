@@ -12,7 +12,7 @@ import useAuth from "./hooks/useAuth";
 
 function App() {
   const [isSidebarOn, setIsSidebarOn] = useState(false);
-  const { auth, loading } = useAuth();
+  const { loading } = useAuth();
 
   const toggleSidebar = () => {
     setIsSidebarOn((prev) => !prev);
