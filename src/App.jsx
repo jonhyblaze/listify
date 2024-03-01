@@ -8,13 +8,19 @@ import EmailAuth from "./components/Login/EmailAuth";
 import Sidebar from "./components/Sidebar";
 import StartUpHandler from "./components/StartUpHandler";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import useAuth from "./hooks/useAuth";
 
 function App() {
   const [isSidebarOn, setIsSidebarOn] = useState(false);
+  const { auth, loading } = useAuth();
 
   const toggleSidebar = () => {
     setIsSidebarOn((prev) => !prev);
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <UserContext.Provider value={{ theme: "dark" }}>

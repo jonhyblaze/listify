@@ -15,7 +15,7 @@ import db from "../firebase/firestore";
 
 function useAuth() {
   const [auth, setAuth] = useState(null);
-  const [loading, setLoading] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
   const authInstance = getAuth(firebaseApp);
@@ -27,6 +27,7 @@ function useAuth() {
       } else {
         setAuth(null);
       }
+      setLoading(false);
     });
 
     return unsubscribe;
