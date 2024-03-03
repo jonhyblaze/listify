@@ -117,7 +117,44 @@ function useDatabase() {
     }
   };
 
-  return { database, createNewList };
+  const renameList = async (index, newListName) => {
+    try {
+      const usersRef = collection(db, "users");
+      const querySnapshot = await getDocs(
+        query(usersRef, where("uid", "==", auth.uid)),
+      );
+
+      if (querySnapshot.empty) {
+        console.log("No matching documents");
+        return;
+      }
+
+      querySnapshot.forEach(async (docSnapshot) => {
+        const userDoc = doc(usersRef, docSnapshot.id);
+
+        // Get the current user's data
+        const userData = docSnapshot.data();
+        console.log("MAYBE IS NEW:", userData, "IIIIII", index);
+
+        // If the list at the given index exists, rename it
+        if (userData.lists[index]) {
+          userData.lists[index].name = newListName;
+
+          // Update the user document
+          await updateDoc(userDoc, userData);
+          console.log("<<<<<<<<<<UPDATE SUCCESFULL>>>>>>>>>>>");
+        }
+      });
+    } catch (e) {
+      console.error(
+        "Error during database update!\n",
+        `Error code: ${e.code}\n`,
+        `Error message: ${e.message}\n`,
+      );
+    }
+  };
+
+  return { database, createNewList, renameList };
 }
 
 export default useDatabase;
