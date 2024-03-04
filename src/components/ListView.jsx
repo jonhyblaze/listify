@@ -32,6 +32,9 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
   };
 
   const toggleRenameList = () => {
+    if (editModeOn) {
+      setEditModeOn(false);
+    }
     setIsRenaming((prev) => !prev);
   };
 
@@ -135,29 +138,29 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
             <span className="pt-[4px]">Add New List</span>
           </div>
         </Button>
-        {!isRenaming ? (
-          <CreateList
-            newListName={newListName}
-            setNewListName={setNewListName}
-            toggleCreateList={toggleCreateList}
-            handleCreateNewList={handleCreateNewList}
-            setCreateModeOn={setCreateModeOn}
-            className={createModeOn ? " translate-y-0" : " translate-y-[100%]"}
-          />
-        ) : (
-          <RenameList
-            className={isRenaming ? " translate-y-0" : " translate-y-[100%]"}
-            toggleRenameList={toggleRenameList}
-            newListName={newListName}
-            setNewListName={setNewListName}
-            handleRenameList={handleRenameList}
-          />
-        )}
+        <CreateList
+          newListName={newListName}
+          setNewListName={setNewListName}
+          toggleCreateList={toggleCreateList}
+          handleCreateNewList={handleCreateNewList}
+          setCreateModeOn={setCreateModeOn}
+          className={createModeOn ? " translate-y-0" : " translate-y-[100%]"}
+        />
+        <RenameList
+          className={isRenaming ? " translate-y-0" : " translate-y-[100%]"}
+          toggleRenameList={toggleRenameList}
+          newListName={newListName}
+          setNewListName={setNewListName}
+          handleRenameList={handleRenameList}
+        />
         <ListMenu
           listMenuActive={listMenuActive}
           toggleListMenu={toggleListMenu}
           toggleCreateList={toggleCreateList}
           handleRenameList={handleRenameList}
+          setIsRenaming={setIsRenaming}
+          setListMenuActive={setListMenuActive}
+          setEditModeOn={setEditModeOn}
           className={editModeOn ? "translate-y-0" : "translate-y-[100%]"}
         />
       </section>
@@ -228,7 +231,6 @@ const CreateList = ({
             className="regular mb-2 rounded border px-3 py-2 text-black"
             type="text"
             placeholder="New list"
-            value={newListName}
             onChange={(e) => setNewListName(e.target.value)}
           />
           <Button
@@ -308,7 +310,12 @@ const ListItem = ({
   );
 };
 
-const ListMenu = ({ className, toggleListMenu, handleRenameList }) => {
+const ListMenu = ({
+  className,
+  toggleListMenu,
+  setEditModeOn,
+  setIsRenaming,
+}) => {
   return (
     <aside
       className={`absolute bottom-0 flex w-full max-w-screen-sm flex-col rounded-md border-2 bg-zinc-100 px-6 py-4 text-black transition duration-300 ease-in-out ${className}`}
@@ -353,7 +360,10 @@ const ListMenu = ({ className, toggleListMenu, handleRenameList }) => {
         <li className="flex cursor-pointer">
           <button
             className="flex items-center gap-3"
-            onClick={handleRenameList}
+            onClick={() => {
+              setEditModeOn(false);
+              setIsRenaming(true);
+            }}
           >
             ✏️ Rename
           </button>
@@ -375,57 +385,6 @@ const ListMenu = ({ className, toggleListMenu, handleRenameList }) => {
   );
 };
 
-function TooltipMenu({ isOpen, setIsOpen }) {
-  return (
-    <div className="relative inline-block  text-left">
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-          <div
-            className="py-1"
-            role="menu"
-            aria-orientation="vertical"
-            aria-labelledby="options-menu"
-          >
-            <button
-              className="flex w-full items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-              role="menuitem"
-            >
-              Manage list
-              <span className="text-xl" onClick={() => setIsOpen(false)}>
-                X
-              </span>
-            </button>
-            <button
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-              role="menuitem"
-            >
-              Rename
-            </button>
-            <button
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-              role="menuitem"
-            >
-              Share
-            </button>
-            <button
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-              role="menuitem"
-            >
-              Copy
-            </button>
-            <button
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-              role="menuitem"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 ListItem.propTypes = {
   name: PropTypes.string.isRequired,
   activeNum: PropTypes.number.isRequired,
@@ -443,10 +402,6 @@ CreateList.propTypes = {
   className: PropTypes.string,
   toggleCreateList: PropTypes.func.isRequired,
   handleCreateNewList: PropTypes.func.isRequired,
-};
-TooltipMenu.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  setIsOpen: PropTypes.func.isRequired,
 };
 
 export default ListView;
