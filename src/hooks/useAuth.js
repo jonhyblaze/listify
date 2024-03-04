@@ -8,10 +8,12 @@ import {
   GoogleAuthProvider,
   updateProfile,
 } from "firebase/auth";
+import { Timestamp, doc, getDoc } from "firebase/firestore";
 import firebaseApp from "../firebase/firebase";
 import { useState, useEffect } from "react";
-import { addDoc, collection } from "firebase/firestore";
+import { setDoc } from "firebase/firestore";
 import db from "../firebase/firestore";
+import { generateUID } from "../functions/utils";
 
 function useAuth() {
   const [auth, setAuth] = useState(null);
@@ -21,10 +23,13 @@ function useAuth() {
   const authInstance = getAuth(firebaseApp);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(authInstance, (user) => {
+    const unsubscribe = onAuthStateChanged(authInstance, async (user) => {
       if (user) {
+        console.log("User signed in");
+        await createUserInFirestore(user);
         setAuth(user);
       } else {
+        console.log("User signed out");
         setAuth(null);
       }
       setLoading(false);
@@ -33,24 +38,25 @@ function useAuth() {
     return unsubscribe;
   }, [authInstance]);
 
-  const signUp = async (email, password, userName) => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        authInstance,
-        email,
-        password,
-      );
+  const createUserInFirestore = async (user, userName) => {
+    // Get a reference to the user document
+    const userDoc = doc(db, "users", user.uid);
 
-      const user = userCredential.user;
-      console.log("Signup Succesfull", user);
+    // Check if the user document already exists
+    const docSnap = await getDoc(userDoc);
 
-      const docRef = await addDoc(collection(db, "users"), {
-        displayName: userName,
-        email,
+    // If the user document does not exist, create it
+    if (!docSnap.exists()) {
+      await setDoc(userDoc, {
+        displayName: userName || user.displayName,
+        email: user.email,
         uid: user.uid || null,
         lists: [
           {
             name: "Bakery",
+            createdAt: Timestamp.now(),
+            lastUpdated: Timestamp.now(),
+            list_uid: generateUID(),
             items: [
               {
                 name: "baguette",
@@ -66,6 +72,9 @@ function useAuth() {
           },
           {
             name: "Alcohol",
+            createdAt: Timestamp.now(),
+            lastUpdated: Timestamp.now(),
+            list_uid: generateUID(),
             items: [
               {
                 name: "beer",
@@ -87,7 +96,24 @@ function useAuth() {
         ],
       });
 
-      console.log("Document written with ID: ", docRef.id);
+      console.log("Document written with ID: ", user.uid);
+    } else {
+      console.log("User document already exists");
+    }
+  };
+
+  const signUp = async (email, password, userName) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        authInstance,
+        email,
+        password,
+      );
+
+      const user = userCredential.user;
+      console.log("Signup Succesfull", user);
+
+      await createUserInFirestore(user, userName);
 
       setAuth(user);
 
@@ -140,17 +166,7 @@ function useAuth() {
   const googleSignIn = async () => {
     try {
       // Initiate redirect using signInWithRedirect
-      const result = await signInWithRedirect(authInstance, googleProvider);
-
-      // Handle callback automatically by listening to auth state changes
-      onAuthStateChanged(authInstance, (user) => {
-        if (user) {
-          // User successfully signed in
-          setAuth(user);
-          // Perform additional actions (e.g., update UI, store user data)
-          console.log("Google sign in succesfull");
-        }
-      });
+      await signInWithRedirect(authInstance, googleProvider);
     } catch (error) {
       console.error(
         "Sign up with google went wrong!\n",

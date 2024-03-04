@@ -10,6 +10,7 @@ import {
   where,
 } from "firebase/firestore";
 import db from "../firebase/firestore";
+import { generateUID } from "../functions/utils";
 import { useState, useEffect } from "react";
 import useAuth from "./useAuth";
 
@@ -102,6 +103,7 @@ function useDatabase() {
           items: [],
           createdAt: Timestamp.now(),
           lastUpdated: Timestamp.now(),
+          list_uid: generateUID(),
         };
 
         await updateDoc(userDoc, {
