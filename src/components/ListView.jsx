@@ -357,28 +357,23 @@ const ListMenu = ({
         </div>
       </div>
       <ul className="grid gap-2">
-        <li className="flex cursor-pointer">
-          <button
-            className="flex items-center gap-3"
-            onClick={() => {
-              setEditModeOn(false);
-              setIsRenaming(true);
-            }}
-          >
-            ✏️ Rename
-          </button>
+        <li
+          className="inline-flex cursor-pointer gap-2"
+          onClick={() => {
+            setEditModeOn(false);
+            setIsRenaming(true);
+          }}
+        >
+          <span>✏️</span>Rename
         </li>
-        <li className="flex cursor-pointer items-center gap-3">
-          <span>📤</span>
-          <span>Share</span>
+        <li className="inline-flex gap-2">
+          <span>📤</span> Share
         </li>
-        <li className="flex cursor-pointer items-center gap-3">
-          <span>📑</span>
-          <span>Copy</span>
+        <li className="inline-flex gap-2">
+          <span>📑</span> Copy
         </li>
-        <li className="flex cursor-pointer items-center gap-3">
-          <span>🗑️</span>
-          <span>Delete️</span>
+        <li className="inline-flex gap-2">
+          <span>🗑️</span> Delete️
         </li>
       </ul>
     </aside>
