@@ -1,14 +1,10 @@
 import {
-  collection,
   onSnapshot,
-  getDocs,
   getDoc,
   doc,
   updateDoc,
   arrayUnion,
   Timestamp,
-  query,
-  where,
 } from "firebase/firestore";
 import db from "../firebase/firestore";
 import { generateUID } from "../functions/utils";
@@ -128,7 +124,34 @@ function useDatabase() {
     }
   };
 
-  return { database, createNewList, renameList };
+  const deleteList = async (index) => {
+    try {
+      // Get a reference to the user document
+      const userDoc = doc(db, "users", auth.uid);
+
+      // Get the current user's data
+      const docSnap = await getDoc(userDoc);
+      const userData = docSnap.data();
+
+      // If the list at the given index exists, delete it
+      if (userData.lists[index]) {
+        // Remove the list from the lists array
+        userData.lists.splice(index, 1);
+
+        // Update the user document
+        await updateDoc(userDoc, userData);
+        console.log("List deleted successfully");
+      }
+    } catch (e) {
+      console.error(
+        "Error during database update!\n",
+        `Error code: ${e.code}\n`,
+        `Error message: ${e.message}\n`,
+      );
+    }
+  };
+
+  return { database, createNewList, renameList, deleteList };
 }
 
 export default useDatabase;

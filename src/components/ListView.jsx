@@ -5,7 +5,7 @@ import { Fragment, useState } from "react";
 import PropTypes from "prop-types";
 
 const ListView = ({ isSidebarOn, toggleSidebar }) => {
-  const { database, createNewList, renameList } = useDatabase();
+  const { database, createNewList, renameList, deleteList } = useDatabase();
   const [createModeOn, setCreateModeOn] = useState(false);
   const [listMenuActive, setListMenuActive] = useState(false);
   const [newListName, setNewListName] = useState("");
@@ -18,7 +18,7 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
   console.log("Is renaming::::::::::", isRenaming);
   console.log("List index::::::::::", currentListIndex);
 
-  console.log(newListName);
+  console.log("New LIST NAME>>>>>>>>>", newListName);
 
   const toggleCreateList = () => {
     if (editModeOn) {
@@ -29,6 +29,7 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
     }
 
     setCreateModeOn((prev) => !prev);
+    setNewListName("");
   };
 
   const toggleRenameList = () => {
@@ -64,7 +65,7 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
 
         setTimeout(() => {
           setNewListName("");
-        }, [400]);
+        }, 400);
       }
     } catch (e) {
       console.error(e);
@@ -84,6 +85,11 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
       console.error(e);
     }
     setNewListName("");
+  };
+
+  const handleDeleteList = async () => {
+    await deleteList(currentListIndex);
+    setEditModeOn(false);
   };
 
   return (
@@ -161,6 +167,7 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
           setIsRenaming={setIsRenaming}
           setListMenuActive={setListMenuActive}
           setEditModeOn={setEditModeOn}
+          handleDeleteList={handleDeleteList}
           className={editModeOn ? "translate-y-0" : "translate-y-[100%]"}
         />
       </section>
@@ -234,6 +241,7 @@ const CreateList = ({
             onChange={(e) => setNewListName(e.target.value)}
           />
           <Button
+            value={newListName}
             onClick={handleCreateNewList}
             className="bold mb-2 rounded border px-4 py-2 text-white"
           >
@@ -315,6 +323,7 @@ const ListMenu = ({
   toggleListMenu,
   setEditModeOn,
   setIsRenaming,
+  handleDeleteList,
 }) => {
   return (
     <aside
@@ -366,13 +375,16 @@ const ListMenu = ({
         >
           <span>✏️</span>Rename
         </li>
-        <li className="inline-flex gap-2">
+        <li className="inline-flex cursor-pointer gap-2">
           <span>📤</span> Share
         </li>
-        <li className="inline-flex gap-2">
+        <li className="inline-flex cursor-pointer gap-2">
           <span>📑</span> Copy
         </li>
-        <li className="inline-flex gap-2">
+        <li
+          className="inline-flex cursor-pointer gap-2"
+          onClick={handleDeleteList}
+        >
           <span>🗑️</span> Delete️
         </li>
       </ul>
