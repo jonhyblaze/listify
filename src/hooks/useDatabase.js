@@ -2,6 +2,7 @@ import {
   collection,
   onSnapshot,
   getDocs,
+  getDoc,
   doc,
   updateDoc,
   arrayUnion,
@@ -22,17 +23,22 @@ function useDatabase() {
     if (auth && auth.uid) {
       const fetchDatabase = async () => {
         try {
-          const querySnapshot = await getDocs(collection(db, "users"));
-          querySnapshot.forEach((doc) => {
-            //console.log(`${doc.id} => ${doc.data()}`);
-            if (auth && auth.uid && doc.data().uid === auth.uid) {
-              setDatabase(doc.data());
-            }
-          });
+          // Get a reference to the user document
+          const userDoc = doc(db, "users", auth.uid);
+
+          // Fetch the user document
+          const docSnap = await getDoc(userDoc);
+
+          if (docSnap.exists()) {
+            // If the user document exists, set the database state
+            setDatabase(docSnap.data());
+          } else {
+            console.log("No such document!");
+          }
         } catch (error) {
           console.error(
             "Error during data fetch!\n",
-            `Erorr code: ${error.code}\n`,
+            `Error code: ${error.code}\n`,
             `Error message: ${error.message}\n`,
           );
         }
@@ -43,73 +49,46 @@ function useDatabase() {
 
   useEffect(() => {
     if (auth && auth.uid) {
-      const usersRef = collection(db, "users");
+      const userDoc = doc(db, "users", auth.uid);
       // Define an async function inside the useEffect hook
-      const fetchUserDoc = async () => {
-        const querySnapshot = await getDocs(
-          query(usersRef, where("uid", "==", auth.uid)),
-        );
+      const unsubscribe = onSnapshot(userDoc, (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const userData = docSnapshot.data();
+          setDatabase({ ...userData });
+        } else {
+          console.log("No such document!");
+        }
+      });
 
-        querySnapshot.forEach((docSnapshot) => {
-          if (docSnapshot.exists()) {
-            // Get the document ID
-            const docId = docSnapshot.id;
-
-            // Set up the onSnapshot listener with the document ID
-            const userDoc = doc(usersRef, docId);
-            const unsubscribe = onSnapshot(userDoc, (docSnapshot) => {
-              if (docSnapshot.exists()) {
-                const userData = docSnapshot.data();
-
-                setDatabase({ ...userData });
-              } else {
-                console.log("No such document!");
-              }
-            });
-
-            // Cleanup function to be called when the component unmounts
-            return () => unsubscribe();
-          } else {
-            console.log("No such document!");
-          }
-        });
-      };
-
-      // Call the async function
-      fetchUserDoc();
+      // Cleanup function to be called when the component unmounts
+      return () => unsubscribe();
+    } else {
+      console.log("No such document!");
     }
   }, [auth, db]);
 
   const createNewList = async (newListName) => {
     try {
-      const usersRef = collection(db, "users");
-      const querySnapshot = await getDocs(
-        query(usersRef, where("uid", "==", auth.uid)),
-      );
+      // Get a reference to the user document
+      const userDoc = doc(db, "users", auth.uid);
 
-      if (querySnapshot.empty) {
-        console.log("No matching documents");
-        return;
-      }
+      const newList = {
+        name: newListName,
+        items: [],
+        createdAt: Timestamp.now(),
+        lastUpdated: Timestamp.now(),
+        list_uid: generateUID(),
+      };
 
-      console.log("NEW_LIST------name", newListName);
-      console.log("NEW_LIST------UID", auth.uid);
-
-      querySnapshot.forEach(async (docSnapshot) => {
-        const userDoc = doc(usersRef, docSnapshot.id);
-
-        const newList = {
-          name: newListName,
-          items: [],
-          createdAt: Timestamp.now(),
-          lastUpdated: Timestamp.now(),
-          list_uid: generateUID(),
-        };
-
-        await updateDoc(userDoc, {
-          lists: arrayUnion(newList),
-        });
+      await updateDoc(userDoc, {
+        lists: arrayUnion(newList),
       });
+
+      console.log(
+        `New list succesfully created \n`,
+        `List name >>> ${newListName}\n`,
+        `List UID >>> ${newList.list_uid}`,
+      );
     } catch (e) {
       console.e(
         "Error during database update!\n",
@@ -121,32 +100,25 @@ function useDatabase() {
 
   const renameList = async (index, newListName) => {
     try {
-      const usersRef = collection(db, "users");
-      const querySnapshot = await getDocs(
-        query(usersRef, where("uid", "==", auth.uid)),
-      );
+      // Get a reference to the user document
+      const userDoc = doc(db, "users", auth.uid);
 
-      if (querySnapshot.empty) {
+      // Get the current user's data
+      const docSnap = await getDoc(userDoc);
+      const userData = docSnap.data();
+
+      if (userData.empty) {
         console.log("No matching documents");
         return;
       }
 
-      querySnapshot.forEach(async (docSnapshot) => {
-        const userDoc = doc(usersRef, docSnapshot.id);
+      if (userData.lists[index]) {
+        userData.lists[index].name = newListName;
 
-        // Get the current user's data
-        const userData = docSnapshot.data();
-        console.log("MAYBE IS NEW:", userData, "IIIIII", index);
-
-        // If the list at the given index exists, rename it
-        if (userData.lists[index]) {
-          userData.lists[index].name = newListName;
-
-          // Update the user document
-          await updateDoc(userDoc, userData);
-          console.log("<<<<<<<<<<UPDATE SUCCESFULL>>>>>>>>>>>");
-        }
-      });
+        // Update the user document
+        await updateDoc(userDoc, userData);
+        console.log(`Document update succesfull\n`, userData);
+      }
     } catch (e) {
       console.error(
         "Error during database update!\n",
