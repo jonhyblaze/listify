@@ -42,15 +42,19 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
     }
 
     if (renameModeOn) {
+      setRenameModeOn((prev) => !prev);
       setEditModeOn((prev) => !prev);
       return;
     }
 
-    setEditModeOn((prev) => !prev);
+    if (editModeOn) {
+      setEditModeOn(false);
+    }
 
     const id = event.target.id;
     if (id) {
       setCurrentListIndex(Number(event.target.id));
+      setEditModeOn(true);
     } else setCurrentListIndex(null);
   };
 
