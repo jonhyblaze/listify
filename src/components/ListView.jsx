@@ -7,36 +7,33 @@ import PropTypes from "prop-types";
 const ListView = ({ isSidebarOn, toggleSidebar }) => {
   const { database, createNewList, renameList, deleteList } = useDatabase();
   const [createModeOn, setCreateModeOn] = useState(false);
-  const [listMenuActive, setListMenuActive] = useState(false);
+
   const [newListName, setNewListName] = useState("");
   const [editModeOn, setEditModeOn] = useState(false);
   const [currentListIndex, setCurrentListIndex] = useState(null);
-  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameModeOn, setRenameModeOn] = useState(false);
 
-  console.log("Edit mode is::::::::::", editModeOn);
-  console.log("Create mode is::::::::::", createModeOn);
-  console.log("Is renaming::::::::::", isRenaming);
-  console.log("List index::::::::::", currentListIndex);
-
-  console.log("New LIST NAME>>>>>>>>>", newListName);
+  console.log("Edit mode is on::::::::::", editModeOn);
+  console.log("Create mode is on::::::::::", createModeOn);
+  console.log("Rename mode is on::::::::::", renameModeOn);
+  console.log("List menu index::::::::::", currentListIndex);
 
   const toggleCreateList = () => {
     if (editModeOn) {
       setEditModeOn(false);
     }
-    if (listMenuActive) {
-      setListMenuActive(false);
-    }
 
     setCreateModeOn((prev) => !prev);
-    setNewListName("");
+    setTimeout(() => {
+      setNewListName("");
+    }, 400);
   };
 
   const toggleRenameList = () => {
     if (editModeOn) {
       setEditModeOn(false);
     }
-    setIsRenaming((prev) => !prev);
+    setRenameModeOn((prev) => !prev);
   };
 
   const toggleListMenu = (event) => {
@@ -44,7 +41,7 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
       toggleCreateList();
     }
 
-    if (isRenaming) {
+    if (renameModeOn) {
       setEditModeOn((prev) => !prev);
       return;
     }
@@ -57,7 +54,9 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
     } else setCurrentListIndex(null);
   };
 
-  const handleCreateNewList = async () => {
+  const handleCreateNewList = async (e) => {
+    e.preventDefault();
+
     try {
       if (newListName) {
         await createNewList(newListName);
@@ -73,7 +72,9 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
   };
 
   const handleRenameList = async (e) => {
-    setIsRenaming((prev) => !prev);
+    e.preventDefault();
+
+    setRenameModeOn((prev) => !prev);
     setEditModeOn(false);
 
     console.log("EVENT TARGET ID in handleRenameList", e);
@@ -153,19 +154,17 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
           className={createModeOn ? " translate-y-0" : " translate-y-[100%]"}
         />
         <RenameList
-          className={isRenaming ? " translate-y-0" : " translate-y-[100%]"}
+          className={renameModeOn ? " translate-y-0" : " translate-y-[100%]"}
           toggleRenameList={toggleRenameList}
           newListName={newListName}
           setNewListName={setNewListName}
           handleRenameList={handleRenameList}
         />
         <ListMenu
-          listMenuActive={listMenuActive}
           toggleListMenu={toggleListMenu}
           toggleCreateList={toggleCreateList}
           handleRenameList={handleRenameList}
-          setIsRenaming={setIsRenaming}
-          setListMenuActive={setListMenuActive}
+          setRenameModeOn={setRenameModeOn}
           setEditModeOn={setEditModeOn}
           handleDeleteList={handleDeleteList}
           className={editModeOn ? "translate-y-0" : "translate-y-[100%]"}
@@ -194,7 +193,7 @@ const RenameList = ({
           </span>
         </h3>
 
-        <div className="grid">
+        <form className="grid">
           <input
             className="regular mb-2 rounded border px-3 py-2 text-black"
             type="text"
@@ -208,7 +207,7 @@ const RenameList = ({
           >
             SAVE
           </Button>
-        </div>
+        </form>
       </div>
     </div>
   );
@@ -233,11 +232,12 @@ const CreateList = ({
           </span>
         </h3>
 
-        <div className="grid">
+        <form className="grid">
           <input
             className="regular mb-2 rounded border px-3 py-2 text-black"
             type="text"
             placeholder="New list"
+            value={newListName}
             onChange={(e) => setNewListName(e.target.value)}
           />
           <Button
@@ -247,7 +247,7 @@ const CreateList = ({
           >
             SAVE
           </Button>
-        </div>
+        </form>
       </div>
     </div>
   );
@@ -322,7 +322,7 @@ const ListMenu = ({
   className,
   toggleListMenu,
   setEditModeOn,
-  setIsRenaming,
+  setRenameModeOn,
   handleDeleteList,
 }) => {
   return (
@@ -370,7 +370,7 @@ const ListMenu = ({
           className="inline-flex cursor-pointer gap-2"
           onClick={() => {
             setEditModeOn(false);
-            setIsRenaming(true);
+            setRenameModeOn(true);
           }}
         >
           <span>✏️</span>Rename
@@ -392,16 +392,25 @@ const ListMenu = ({
   );
 };
 
+ListView.propTypes = {
+  isSidebarOn: PropTypes.bool.isRequired,
+  toggleSidebar: PropTypes.func.isRequired,
+};
 ListItem.propTypes = {
   name: PropTypes.string.isRequired,
   activeNum: PropTypes.number.isRequired,
   resolvedNum: PropTypes.number.isRequired,
   listLength: PropTypes.number.isRequired,
   isEmpty: PropTypes.bool.isRequired,
+  toggleListMenu: PropTypes.func.isRequired,
+  index: PropTypes.number.isRequired,
 };
-ListView.propTypes = {
-  isSidebarOn: PropTypes.bool.isRequired,
-  toggleSidebar: PropTypes.func.isRequired,
+ListMenu.propTypes = {
+  className: PropTypes.string,
+  toggleListMenu: PropTypes.func.isRequired,
+  setEditModeOn: PropTypes.func.isRequired,
+  setRenameModeOn: PropTypes.func.isRequired,
+  handleDeleteList: PropTypes.func.isRequired,
 };
 CreateList.propTypes = {
   newListName: PropTypes.string.isRequired,
@@ -409,6 +418,14 @@ CreateList.propTypes = {
   className: PropTypes.string,
   toggleCreateList: PropTypes.func.isRequired,
   handleCreateNewList: PropTypes.func.isRequired,
+};
+
+RenameList.propTypes = {
+  className: PropTypes.string,
+  toggleRenameList: PropTypes.func.isRequired,
+  handleRenameList: PropTypes.func.isRequired,
+  newListName: PropTypes.string.isRequired,
+  setNewListName: PropTypes.func.isRequired,
 };
 
 export default ListView;

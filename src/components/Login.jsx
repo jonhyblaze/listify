@@ -1,5 +1,5 @@
 import Button from "./UI/Button";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
 const Login = () => {
@@ -43,7 +43,7 @@ const Login = () => {
         <button
           type="button"
           onClick={handleGoogleAuth}
-          className="flex items-center justify-center rounded-md bg-[#4285F4] px-5 py-2 text-center text-center  text-white hover:bg-[#4285F4]/90 focus:outline-none focus:ring-4 focus:ring-[#4285F4]/50 dark:focus:ring-[#4285F4]/55"
+          className="flex items-center justify-center rounded-md bg-[#4285F4] px-5 py-2 text-center text-white hover:bg-[#4285F4]/90 focus:outline-none focus:ring-4 focus:ring-[#4285F4]/50 dark:focus:ring-[#4285F4]/55"
         >
           <svg
             className="me-2 h-5 w-5"
