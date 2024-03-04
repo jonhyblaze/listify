@@ -81,11 +81,10 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
     setRenameModeOn((prev) => !prev);
     setEditModeOn(false);
 
-    console.log("EVENT TARGET ID in handleRenameList", e);
-    console.log(newListName, currentListIndex);
     try {
       console.log("FETCHING");
       await renameList(currentListIndex, newListName);
+      setCurrentListIndex(null);
     } catch (e) {
       console.error(e);
     }
@@ -135,6 +134,9 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
                   listLength={items}
                   isEmpty={items === 0}
                   toggleListMenu={toggleListMenu}
+                  className={
+                    currentListIndex === index ? "border-green-500" : ""
+                  }
                 />
               </Fragment>
             );
@@ -258,6 +260,7 @@ const CreateList = ({
 };
 
 const ListItem = ({
+  className,
   name,
   activeNum,
   resolvedNum,
@@ -269,7 +272,9 @@ const ListItem = ({
 
   return (
     <>
-      <div className="grid w-full cursor-pointer gap-2 rounded-lg border-2 p-2">
+      <div
+        className={`grid w-full cursor-pointer gap-2 rounded-lg border-2 p-2 ${className}`}
+      >
         <div className="flex items-center justify-between">
           <h3 className="text-xl">{name}</h3>
           <aside onClick={toggleListMenu}>
@@ -401,6 +406,7 @@ ListView.propTypes = {
   toggleSidebar: PropTypes.func.isRequired,
 };
 ListItem.propTypes = {
+  className: PropTypes.string,
   name: PropTypes.string.isRequired,
   activeNum: PropTypes.number.isRequired,
   resolvedNum: PropTypes.number.isRequired,
@@ -417,9 +423,9 @@ ListMenu.propTypes = {
   handleDeleteList: PropTypes.func.isRequired,
 };
 CreateList.propTypes = {
+  className: PropTypes.string,
   newListName: PropTypes.string.isRequired,
   setNewListName: PropTypes.func.isRequired,
-  className: PropTypes.string,
   toggleCreateList: PropTypes.func.isRequired,
   handleCreateNewList: PropTypes.func.isRequired,
 };
