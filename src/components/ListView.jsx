@@ -1,22 +1,30 @@
 import Button from "./UI/Button";
 import Sidebar from "./Sidebar";
+import List from "./List";
 import useDatabase from "../hooks/useDatabase";
 import { Fragment, useState } from "react";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 
 const ListView = ({ isSidebarOn, toggleSidebar }) => {
   const { database, createNewList, renameList, deleteList } = useDatabase();
   const [createModeOn, setCreateModeOn] = useState(false);
+  const navigate = useNavigate();
+  const [currentListIndex, setCurrentListIndex] = useState(null);
 
   const [newListName, setNewListName] = useState("");
   const [editModeOn, setEditModeOn] = useState(false);
-  const [currentListIndex, setCurrentListIndex] = useState(null);
   const [renameModeOn, setRenameModeOn] = useState(false);
+  const [isListOpened, setIsListOpened] = useState(false);
+  const [openListIndex, setOpenListIndex] = useState(null);
 
   console.log("Edit mode is on::::::::::", editModeOn);
   console.log("Create mode is on::::::::::", createModeOn);
   console.log("Rename mode is on::::::::::", renameModeOn);
   console.log("List menu index::::::::::", currentListIndex);
+  console.log("Is list opened::::::::::", isListOpened);
+
+  console.log(database.lists);
 
   const toggleCreateList = () => {
     if (editModeOn) {
@@ -96,11 +104,30 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
     setEditModeOn(false);
   };
 
+  console.log(openListIndex, "<<<<<<<<<<<<");
+
+  const toggleIsListOpen = (e) => {
+    console.log("List is opened");
+    setOpenListIndex(Number(e.target.id));
+    setIsListOpened((prev) => !prev);
+  };
+
+  const handleOpenList = (e) => {
+    toggleIsListOpen();
+    console.log("List is opened");
+  };
+
   return (
     <>
       {isSidebarOn && (
         <Sidebar toggleSidebar={toggleSidebar} isSidebarOn={isSidebarOn} />
       )}
+      <List
+        list={database?.lists?.[openListIndex]}
+        listIndex={openListIndex}
+        toggleIsListOpen={toggleIsListOpen}
+        className={isListOpened ? "translate-x-[0%]	" : "-translate-x-[100%]	"}
+      />
       <section className="bold relative grid h-full grid-rows-[20%,65%,15%] overflow-hidden px-5 text-white">
         <div className="mt-6 flex items-center gap-4 place-self-start">
           <aside className="cursor-pointer" onClick={toggleSidebar}>
@@ -134,6 +161,8 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
                   listLength={items}
                   isEmpty={items === 0}
                   toggleListMenu={toggleListMenu}
+                  toggleIsListOpen={toggleIsListOpen}
+                  handleOpenList={handleOpenList}
                   className={
                     currentListIndex === index ? "border-green-500" : ""
                   }
@@ -180,6 +209,78 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
   );
 };
 
+const ListItem = ({
+  className,
+  name,
+  activeNum,
+  resolvedNum,
+  isEmpty,
+  toggleListMenu,
+  index,
+  handleOpenList,
+  toggleIsListOpen,
+}) => {
+  const statusBar = isEmpty ? 0 : Math.round((activeNum / resolvedNum) * 100);
+
+  return (
+    <>
+      <div
+        className={`grid w-full cursor-pointer gap-2 rounded-lg border-2 p-2 ${className}`}
+      >
+        <div className="flex items-center justify-between">
+          <h3 onClick={toggleIsListOpen} id={index} className="w-[80%] text-xl">
+            {name}
+          </h3>
+          <aside onClick={toggleListMenu}>
+            <svg
+              id={index}
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                cx="12"
+                cy="6"
+                r="2"
+                fill="#FFFFFF"
+                pointerEvents="none"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="2"
+                fill="#FFFFFF"
+                pointerEvents="none"
+              />
+              <circle
+                cx="12"
+                cy="18"
+                r="2"
+                fill="#FFFFFF"
+                pointerEvents="none"
+              />
+            </svg>
+          </aside>
+        </div>
+        <div className="mb-2 flex items-end gap-4">
+          <div className="w-full rounded border">
+            <div
+              className={`mx-1 my-1 h-[12px]  bg-teal-300 `}
+              style={{ width: `${statusBar}%` }}
+            ></div>
+          </div>
+          <div className="regular pb-[1px] text-sm">
+            <span>{activeNum}</span>
+            <span>/</span>
+            <span>{resolvedNum}</span>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
 const RenameList = ({
   className,
   toggleRenameList,
@@ -189,7 +290,7 @@ const RenameList = ({
 }) => {
   return (
     <div
-      className={`absolute bottom-0 z-50 flex w-full max-w-screen-sm translate-y-0 flex-col rounded-md border-2 bg-zinc-700 transition duration-300 ease-in-out ${className}`}
+      className={`absolute bottom-0 z-40 flex w-full max-w-screen-sm translate-y-0 flex-col rounded-md border-2 bg-zinc-700 transition duration-300 ease-in-out ${className}`}
     >
       <div className="mx-8 my-2 grid gap-4 ">
         <h3 className="bold mt-2 inline-flex justify-between self-start text-2xl text-white">
@@ -256,74 +357,6 @@ const CreateList = ({
         </form>
       </div>
     </div>
-  );
-};
-
-const ListItem = ({
-  className,
-  name,
-  activeNum,
-  resolvedNum,
-  isEmpty,
-  toggleListMenu,
-  index,
-}) => {
-  const statusBar = isEmpty ? 0 : Math.round((activeNum / resolvedNum) * 100);
-
-  return (
-    <>
-      <div
-        className={`grid w-full cursor-pointer gap-2 rounded-lg border-2 p-2 ${className}`}
-      >
-        <div className="flex items-center justify-between">
-          <h3 className="text-xl">{name}</h3>
-          <aside onClick={toggleListMenu}>
-            <svg
-              id={index}
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                cx="12"
-                cy="6"
-                r="2"
-                fill="#FFFFFF"
-                pointerEvents="none"
-              />
-              <circle
-                cx="12"
-                cy="12"
-                r="2"
-                fill="#FFFFFF"
-                pointerEvents="none"
-              />
-              <circle
-                cx="12"
-                cy="18"
-                r="2"
-                fill="#FFFFFF"
-                pointerEvents="none"
-              />
-            </svg>
-          </aside>
-        </div>
-        <div className="mb-2 flex items-end gap-4">
-          <div className="w-full rounded border">
-            <div
-              className={`mx-1 my-1 h-[12px]  bg-teal-300 `}
-              style={{ width: `${statusBar}%` }}
-            ></div>
-          </div>
-          <div className="regular pb-[1px] text-sm">
-            <span>{activeNum}</span>
-            <span>/</span>
-            <span>{resolvedNum}</span>
-          </div>
-        </div>
-      </div>
-    </>
   );
 };
 
@@ -407,6 +440,7 @@ ListView.propTypes = {
 };
 ListItem.propTypes = {
   className: PropTypes.string,
+  handleOpenList: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   activeNum: PropTypes.number.isRequired,
   resolvedNum: PropTypes.number.isRequired,
