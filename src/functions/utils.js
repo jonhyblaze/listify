@@ -1,12 +1,26 @@
-function generateUID() {
+function generateUID(name = "id") {
   // Combine timestamp with random number and base conversions
   const timestamp = Date.now().toString(36); // Base 36 for shorter string
   const randomString = Math.random().toString(36).substring(2, 15); // Substring to avoid leading zeroes
-  return timestamp + randomString;
+  return name + "-" + timestamp + randomString;
 }
 
 const capitalize = (str) =>
-  str[0].toUpperCase() + str.slice(1, str.length).toLowerCase();
+  str ? str[0].toUpperCase() + str.slice(1, str.length).toLowerCase() : "";
+
+function debounce(func, wait) {
+  let timeout;
+
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 
 function getEmoji(name) {
   // Convert the name to lowercase to avoid case mismatches
@@ -148,6 +162,8 @@ function getEmoji(name) {
   // If the name is in the dictionary, return the corresponding emoji
   if (name in emojis) {
     return emojis[name];
+  } else if (name === "") {
+    return "";
   }
   // If the name is not in the dictionary, return the generic emoji
   else {
@@ -155,4 +171,4 @@ function getEmoji(name) {
   }
 }
 
-export { generateUID, capitalize, getEmoji };
+export { generateUID, capitalize, getEmoji, debounce };

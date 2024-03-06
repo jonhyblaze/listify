@@ -4,12 +4,11 @@ import List from "./List";
 import useDatabase from "../hooks/useDatabase";
 import { Fragment, useState } from "react";
 import PropTypes from "prop-types";
-import { useNavigate } from "react-router-dom";
 
 const ListView = ({ isSidebarOn, toggleSidebar }) => {
   const { database, createNewList, renameList, deleteList } = useDatabase();
   const [createModeOn, setCreateModeOn] = useState(false);
-  const navigate = useNavigate();
+
   const [currentListIndex, setCurrentListIndex] = useState(null);
 
   const [newListName, setNewListName] = useState("");
@@ -108,11 +107,18 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
 
   const toggleIsListOpen = (e) => {
     console.log("List is opened");
-    setOpenListIndex(Number(e.target.id));
-    setIsListOpened((prev) => !prev);
+
+    if (!isListOpened) {
+      setOpenListIndex(Number(e.target.id));
+      setIsListOpened(true);
+    }
+    if (isListOpened) {
+      setOpenListIndex(null);
+      setIsListOpened(false);
+    }
   };
 
-  const handleOpenList = (e) => {
+  const handleOpenList = () => {
     toggleIsListOpen();
     console.log("List is opened");
   };
@@ -126,6 +132,7 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
         list={database?.lists?.[openListIndex]}
         listIndex={openListIndex}
         toggleIsListOpen={toggleIsListOpen}
+        isListOpened={isListOpened}
         className={isListOpened ? "translate-x-[0%]	" : "-translate-x-[100%]	"}
       />
       <section className="bold relative grid h-full grid-rows-[20%,65%,15%] overflow-hidden px-5 text-white">

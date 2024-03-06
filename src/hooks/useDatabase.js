@@ -73,7 +73,7 @@ function useDatabase() {
         items: [],
         createdAt: Timestamp.now(),
         lastUpdated: Timestamp.now(),
-        list_uid: generateUID(),
+        list_uid: generateUID("list"),
       };
 
       await updateDoc(userDoc, {
@@ -151,7 +151,129 @@ function useDatabase() {
     }
   };
 
-  return { database, createNewList, renameList, deleteList };
+  const createListItem = async (
+    itemName,
+    list_uid,
+    quantity = [1, "items"],
+    checked = false,
+  ) => {
+    try {
+      const userDoc = doc(db, "users", auth.uid);
+      const userSnapshot = await getDoc(userDoc);
+      const userData = userSnapshot.data();
+      const lists = userData.lists;
+      const listIndex = lists.findIndex((list) => list.list_uid === list_uid);
+
+      const newItem = {
+        name: itemName,
+        quantity: quantity,
+        checked: checked,
+        createdAt: Timestamp.now(),
+        lastUpdated: Timestamp.now(),
+        item_uid: generateUID("item"), // Add a unique identifier to each item
+      };
+
+      lists[listIndex].items.unshift(newItem);
+      await updateDoc(userDoc, { lists });
+      console.log(`New item successfully added to list ${list_uid}`);
+    } catch (e) {
+      console.error("Error during database update!", e);
+    }
+  };
+
+  const toggleCheckItem = async (item_uid, list_uid) => {
+    try {
+      const userDoc = doc(db, "users", auth.uid);
+      const userSnapshot = await getDoc(userDoc);
+      const userData = userSnapshot.data();
+      const lists = userData.lists;
+      const listIndex = lists.findIndex((list) => list.list_uid === list_uid);
+      const itemIndex = lists[listIndex].items.findIndex(
+        (item) => item.item_uid === item_uid,
+      );
+
+      // Toggle the 'checked' property of the item
+      lists[listIndex].items[itemIndex].checked =
+        !lists[listIndex].items[itemIndex].checked;
+
+      // Update the 'lastUpdated' property of the item and the list
+      lists[listIndex].items[itemIndex].lastUpdated = Timestamp.now();
+      lists[listIndex].lastUpdated = Timestamp.now();
+
+      // If the item is unchecked, move it to the top of the list
+      if (!lists[listIndex].items[itemIndex].checked) {
+        const item = lists[listIndex].items.splice(itemIndex, 1)[0];
+        lists[listIndex].items.unshift(item);
+      }
+
+      await updateDoc(userDoc, { lists });
+      console.log(`Item check status toggled in list ${list_uid}`);
+    } catch (e) {
+      console.error("Error during database update!", e);
+    }
+  };
+
+  const renameListItem = async (newName, item_uid, list_uid) => {
+    try {
+      const userDoc = doc(db, "users", auth.uid);
+      const userSnapshot = await getDoc(userDoc);
+      const userData = userSnapshot.data();
+      const lists = userData.lists;
+      const listIndex = lists.findIndex((list) => list.list_uid === list_uid);
+      const itemIndex = lists[listIndex].items.findIndex(
+        (item) => item.item_uid === item_uid,
+      );
+
+      // Update the 'name' property of the item
+      lists[listIndex].items[itemIndex].name = newName;
+
+      // Update the 'lastUpdated' property of the item and the list
+      lists[listIndex].items[itemIndex].lastUpdated = Timestamp.now();
+      lists[listIndex].lastUpdated = Timestamp.now();
+
+      await updateDoc(userDoc, { lists });
+      console.log(`Item name updated in list ${list_uid}`);
+    } catch (e) {
+      console.error("Error during database update!", e);
+    }
+  };
+
+  const deleteListItem = async (item_uid, list_uid) => {
+    try {
+      const userDoc = doc(db, "users", auth.uid);
+      const userSnapshot = await getDoc(userDoc);
+      const userData = userSnapshot.data();
+      const lists = userData.lists;
+      const listIndex = lists.findIndex((list) => list.list_uid === list_uid);
+
+      // Find the index of the item to be deleted
+      const itemIndex = lists[listIndex].items.findIndex(
+        (item) => item.item_uid === item_uid,
+      );
+
+      // Remove the item from the list
+      lists[listIndex].items.splice(itemIndex, 1);
+
+      // Update the 'lastUpdated' property of the list
+      lists[listIndex].lastUpdated = Timestamp.now();
+
+      await updateDoc(userDoc, { lists });
+      console.log(`Item successfully deleted from list ${list_uid}`);
+    } catch (e) {
+      console.error("Error during database update!", e);
+    }
+  };
+
+  return {
+    database,
+    createNewList,
+    renameList,
+    deleteList,
+    createListItem,
+    toggleCheckItem,
+    renameListItem,
+    deleteListItem,
+  };
 }
 
 export default useDatabase;

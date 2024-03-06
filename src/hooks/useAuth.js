@@ -56,7 +56,7 @@ function useAuth() {
             name: "Bakery",
             createdAt: Timestamp.now(),
             lastUpdated: Timestamp.now(),
-            list_uid: generateUID(),
+            list_uid: generateUID("list"),
             items: [
               {
                 name: "baguette",
@@ -64,7 +64,7 @@ function useAuth() {
                 quantity: [2, "items"],
                 createdAt: Timestamp.now(),
                 lastUpdated: Timestamp.now(),
-                item_uid: generateUID(),
+                item_uid: generateUID("item"),
               },
               {
                 name: "bread",
@@ -72,7 +72,7 @@ function useAuth() {
                 quantity: [1, "items"],
                 createdAt: Timestamp.now(),
                 lastUpdated: Timestamp.now(),
-                item_uid: generateUID(),
+                item_uid: generateUID("item"),
               },
             ],
           },
@@ -80,7 +80,7 @@ function useAuth() {
             name: "Alcohol",
             createdAt: Timestamp.now(),
             lastUpdated: Timestamp.now(),
-            list_uid: generateUID(),
+            list_uid: generateUID("list"),
             items: [
               {
                 name: "beer",
@@ -88,7 +88,7 @@ function useAuth() {
                 quantity: [4, "items"],
                 createdAt: Timestamp.now(),
                 lastUpdated: Timestamp.now(),
-                item_uid: generateUID(),
+                item_uid: generateUID("item"),
               },
               {
                 name: "wine",
@@ -96,7 +96,7 @@ function useAuth() {
                 quantity: [1, "items"],
                 createdAt: Timestamp.now(),
                 lastUpdated: Timestamp.now(),
-                item_uid: generateUID(),
+                item_uid: generateUID("item"),
               },
               {
                 name: "vodka",
@@ -104,7 +104,7 @@ function useAuth() {
                 quantity: [0.5, "items"],
                 createdAt: Timestamp.now(),
                 lastUpdated: Timestamp.now(),
-                item_uid: generateUID(),
+                item_uid: generateUID("item"),
               },
             ],
           },
