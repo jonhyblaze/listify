@@ -156,39 +156,45 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
             />
           ))}
         </ul>
-        <Button
-          onClick={toggleCreateList}
-          className="black mb-6 mr-3 place-self-end rounded-md border-2 px-4 py-1 uppercase"
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-4xl">+</span>
-            <span className="pt-[4px]">Add New List</span>
-          </div>
-        </Button>
-        <CreateList
-          newListName={newListName}
-          setNewListName={setNewListName}
-          toggleCreateList={toggleCreateList}
-          handleCreateNewList={handleCreateNewList}
-          setCreateModeOn={setCreateModeOn}
-          className={createModeOn ? " translate-y-0" : " translate-y-[100%]"}
-        />
-        <RenameList
-          className={renameModeOn ? " translate-y-0" : " translate-y-[100%]"}
-          toggleRenameList={toggleRenameList}
-          newListName={newListName}
-          setNewListName={setNewListName}
-          handleRenameList={handleRenameList}
-        />
-        <ListMenu
-          toggleListMenu={toggleListMenu}
-          toggleCreateList={toggleCreateList}
-          handleRenameList={handleRenameList}
-          setRenameModeOn={setRenameModeOn}
-          setEditModeOn={setEditModeOn}
-          handleDeleteList={handleDeleteList}
-          className={editModeOn ? "translate-y-0" : "translate-y-[100%]"}
-        />
+        {!isListOpened && (
+          <>
+            <Button
+              onClick={toggleCreateList}
+              className={`black mb-6 mr-3 place-self-end rounded-md border-2 px-4 py-1 uppercase `}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-4xl">+</span>
+                <span className="pt-[4px]">Add New List</span>
+              </div>
+            </Button>
+            <CreateList
+              newListName={newListName}
+              setNewListName={setNewListName}
+              toggleCreateList={toggleCreateList}
+              handleCreateNewList={handleCreateNewList}
+              setCreateModeOn={setCreateModeOn}
+              className={createModeOn ? " translate-y-0" : "translate-y-[100%]"}
+            />
+            <RenameList
+              className={
+                renameModeOn ? " translate-y-0" : " translate-y-[100%]"
+              }
+              toggleRenameList={toggleRenameList}
+              newListName={newListName}
+              setNewListName={setNewListName}
+              handleRenameList={handleRenameList}
+            />
+            <ListMenu
+              toggleListMenu={toggleListMenu}
+              toggleCreateList={toggleCreateList}
+              handleRenameList={handleRenameList}
+              setRenameModeOn={setRenameModeOn}
+              setEditModeOn={setEditModeOn}
+              handleDeleteList={handleDeleteList}
+              className={editModeOn ? "translate-y-0" : "translate-y-[100%]"}
+            />
+          </>
+        )}
       </section>
     </>
   );
@@ -281,7 +287,7 @@ const RenameList = ({
           </span>
         </h3>
 
-        <form className="grid">
+        <form className="grid" action="/">
           <input
             className="regular mb-2 rounded border px-3 py-2 text-black"
             type="text"
@@ -291,7 +297,7 @@ const RenameList = ({
           />
           <Button
             onClick={handleRenameList}
-            className="bold mb-2 rounded border px-4 py-2 text-white"
+            className="bold mb-2 rounded border px-4 py-2 text-center text-white"
           >
             SAVE
           </Button>
@@ -331,7 +337,7 @@ const CreateList = ({
           <Button
             value={newListName}
             onClick={handleCreateNewList}
-            className="bold mb-2 rounded border px-4 py-2 text-white"
+            className="bold mb-2 rounded border px-4 py-2 text-center text-white"
           >
             SAVE
           </Button>
