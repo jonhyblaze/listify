@@ -1,14 +1,12 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import BackButton from "./UI/BackButton";
 import useDatabase from "../hooks/useDatabase";
 import OptionsButton from "./UI/OptionsButton";
 import PropTypes from "prop-types";
-import {
-  capitalize,
-  generateUID,
-  getEmoji,
-  debounce,
-} from "../functions/utils";
+import Loading from "./UI/Loading";
+import { useListStats } from "../hooks/hooks";
+
+import { capitalize, getEmoji } from "../functions/utils";
 import Button from "./UI/Button";
 
 const List = ({
@@ -18,43 +16,56 @@ const List = ({
   toggleIsListOpen,
   isListOpened,
 }) => {
-  console.log("Current list index >>>>>>>", listIndex, list);
   const [loading, setLoading] = useState(true);
   const { createListItem, toggleCheckItem, renameListItem, deleteListItem } =
     useDatabase();
+  const listStats = useListStats(list);
+
+  const sortedItems = useMemo(() => {
+    if (list?.items) {
+      return [...list.items].sort(
+        (el1, el2) => (el1.checked ? 1 : -1) - (el2.checked ? 1 : -1),
+      );
+    }
+    return [];
+  }, [list?.items]);
 
   useEffect(() => {
-    if (list) {
+    if (list?.name && list?.items) {
       setLoading(false);
     }
-  }, [list]);
+  }, [list?.items, list?.name]);
 
-  let listItems = list?.items || [
-    { name: "Item 01" },
-    { name: "Item 02" },
-    { name: "Item 03" },
-  ];
-  let listName = list?.name || "Unnamed List";
+  if (loading && isListOpened) {
+    return <Loading />;
+  }
 
-  //console.log(list);
   const handleCreateItem = async () => {
-    await createListItem("", list?.list_uid);
+    try {
+      await createListItem("", list?.list_uid);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleToggleCheckItem = async (e) => {
-    await toggleCheckItem(e.currentTarget.id, list?.list_uid);
+    try {
+      await toggleCheckItem(e.currentTarget.id, list?.list_uid);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  if (loading === false)
+  if (loading === false && list?.items) {
     return (
       <div
-        className={`absolute z-50 grid h-full w-full bg-zinc-700 p-4 text-white transition duration-300 ease-in-out ${className}`}
+        className={`absolute z-50 grid h-full w-full overflow-hidden bg-zinc-700 p-4 text-white transition duration-300 ease-in-out ${className}`}
       >
         <header className="w-full self-start">
           <nav className="inline-flex h-12 w-full items-center justify-between">
             <div className="inline-flex items-center">
               <BackButton toggler={toggleIsListOpen} className="!px-0" />
-              <h5 className="text-xl">{listName}</h5>
+              <h5 className="text-xl">{list?.name}</h5>
             </div>
             <OptionsButton
               toggle={() => console.log("Toggle manage list")}
@@ -63,47 +74,44 @@ const List = ({
           </nav>
 
           <div className="mt-2 flex items-end gap-4">
-            <div className="w-full rounded border">
+            <div className="w-full rounded border pr-2">
               <div
                 className={`mx-1 my-1 h-[10px]  bg-teal-300 `}
-                style={{ width: `50%` }}
+                style={{ width: `${listStats?.progress}%` }}
               ></div>
             </div>
           </div>
         </header>
 
         <ul className="flex flex-col gap-3">
-          {listItems &&
-            listItems
-              ?.sort(
-                (el1, el2) => (el1.checked ? 1 : -1) - (el2.checked ? 1 : -1),
-              )
-              ?.map((el) => (
-                <ListElement
-                  name={el.name}
-                  checked={el.checked}
-                  id={el.item_uid}
-                  toggleCheck={handleToggleCheckItem}
-                  renameListItem={renameListItem}
-                  deleteListItem={deleteListItem}
-                  isListOpened={isListOpened}
-                  listId={list?.list_uid}
-                  listIndex={listIndex}
-                  key={el.item_uid}
-                />
-              ))}
+          {sortedItems.map((el) => (
+            <ListElement
+              name={el.name}
+              checked={el.checked}
+              listStats={listStats}
+              id={el.item_uid}
+              toggleCheck={handleToggleCheckItem}
+              renameListItem={renameListItem}
+              deleteListItem={deleteListItem}
+              isListOpened={isListOpened}
+              listId={list?.list_uid}
+              listIndex={listIndex}
+              key={el.item_uid}
+            />
+          ))}
         </ul>
         <Button
           onClick={handleCreateItem}
-          className="black mb-4 place-self-end rounded-md border-2 px-4 py-0.5 uppercase"
+          className="black mb-6 mr-3 place-self-end rounded-md border-2 px-5 py-2 uppercase"
         >
           <div className="flex items-center gap-2">
-            <span className="text-4xl">+</span>
+            <span className="text-2xl">+</span>
             <span className="pt-[4px]">Add</span>
           </div>
         </Button>
       </div>
     );
+  }
 };
 
 export default List;
@@ -116,8 +124,6 @@ const ListElement = ({
   renameListItem,
   deleteListItem,
   listId,
-  listIndex,
-  isListOpened,
 }) => {
   const [itemName, setItemName] = useState(name);
   const [isEditing, setIsEditing] = useState(false);
@@ -152,10 +158,10 @@ const ListElement = ({
 
   return (
     <li
-      className={`flex h-fit w-full items-center justify-between ${checked ? "opacity-40" : "opacity-100"}`}
+      className={`flex h-fit w-full items-center justify-between overflow-hidden ${checked ? "opacity-40" : "opacity-100"}`}
     >
       <aside
-        className={`absolute right-0 inline-flex bg-zinc-200 text-[18px] text-black duration-300 ease-in-out ${sideMenuOn ? "translate-x-[0%]" : "translate-x-[600%]"}`}
+        className={`absolute right-0  inline-flex  bg-zinc-200 text-[18px] text-black duration-300 ease-in-out ${sideMenuOn ? "translate-x-[0%]" : "translate-x-[500%]"}`}
       >
         <span
           onClick={() => {
@@ -217,9 +223,15 @@ List.propTypes = {
   listIndex: PropTypes.number,
   toggleIsListOpen: PropTypes.func,
   className: PropTypes.string,
+  isListOpened: PropTypes.bool.isRequired,
 };
 ListElement.propTypes = {
   name: PropTypes.string.isRequired,
   checked: PropTypes.bool.isRequired,
   emoji: PropTypes.string,
+  toggleCheck: PropTypes.func,
+  id: PropTypes.string || PropTypes.number,
+  renameListItem: PropTypes.func,
+  deleteListItem: PropTypes.func,
+  listId: PropTypes.string || PropTypes.number,
 };

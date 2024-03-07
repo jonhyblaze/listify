@@ -2,8 +2,9 @@ import Button from "./UI/Button";
 import Sidebar from "./Sidebar";
 import List from "./List";
 import useDatabase from "../hooks/useDatabase";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import PropTypes from "prop-types";
+import { useListStats } from "../hooks/hooks";
 
 const ListView = ({ isSidebarOn, toggleSidebar }) => {
   const { database, createNewList, renameList, deleteList } = useDatabase();
@@ -22,8 +23,6 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
   console.log("Rename mode is on::::::::::", renameModeOn);
   console.log("List menu index::::::::::", currentListIndex);
   console.log("Is list opened::::::::::", isListOpened);
-
-  console.log(database.lists);
 
   const toggleCreateList = () => {
     if (editModeOn) {
@@ -118,11 +117,6 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
     }
   };
 
-  const handleOpenList = () => {
-    toggleIsListOpen();
-    console.log("List is opened");
-  };
-
   return (
     <>
       {isSidebarOn && (
@@ -150,37 +144,21 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
           </aside>
           <h1 className="text-3xl ">My lists</h1>
         </div>
-        <div className="grid gap-2 self-start ">
-          {database?.lists?.map((list, index) => {
-            let items = Number(list.items.length);
-            let checkedItems = Number(
-              list.items.filter((item) => item.checked).length,
-            );
-            let uncheckedItems = Number(items - checkedItems);
-
-            return (
-              <Fragment key={index}>
-                <ListItem
-                  name={list.name}
-                  index={index}
-                  activeNum={uncheckedItems}
-                  resolvedNum={items}
-                  listLength={items}
-                  isEmpty={items === 0}
-                  toggleListMenu={toggleListMenu}
-                  toggleIsListOpen={toggleIsListOpen}
-                  handleOpenList={handleOpenList}
-                  className={
-                    currentListIndex === index ? "border-green-500" : ""
-                  }
-                />
-              </Fragment>
-            );
-          })}
-        </div>
+        <ul className="grid gap-2 self-start ">
+          {database?.lists?.map((list, index) => (
+            <ListItem
+              list={list}
+              index={index}
+              toggleListMenu={toggleListMenu}
+              toggleIsListOpen={toggleIsListOpen}
+              className={currentListIndex === index ? "border-green-500" : ""}
+              key={index}
+            />
+          ))}
+        </ul>
         <Button
           onClick={toggleCreateList}
-          className="black mb-4  place-self-end rounded-md border-2 px-4 py-0.5 uppercase"
+          className="black mb-6 mr-3 place-self-end rounded-md border-2 px-4 py-1 uppercase"
         >
           <div className="flex items-center gap-2">
             <span className="text-4xl">+</span>
@@ -218,25 +196,21 @@ const ListView = ({ isSidebarOn, toggleSidebar }) => {
 
 const ListItem = ({
   className,
-  name,
-  activeNum,
-  resolvedNum,
-  isEmpty,
-  toggleListMenu,
+  list,
   index,
-  handleOpenList,
+  toggleListMenu,
   toggleIsListOpen,
 }) => {
-  const statusBar = isEmpty ? 0 : Math.round((activeNum / resolvedNum) * 100);
+  const listStats = useListStats(list);
 
   return (
     <>
-      <div
+      <li
         className={`grid w-full cursor-pointer gap-2 rounded-lg border-2 p-2 ${className}`}
       >
         <div className="flex items-center justify-between">
           <h3 onClick={toggleIsListOpen} id={index} className="w-[80%] text-xl">
-            {name}
+            {list?.name}
           </h3>
           <aside onClick={toggleListMenu}>
             <svg
@@ -271,19 +245,19 @@ const ListItem = ({
           </aside>
         </div>
         <div className="mb-2 flex items-end gap-4">
-          <div className="w-full rounded border">
+          <div className="w-full rounded border pr-2">
             <div
-              className={`mx-1 my-1 h-[12px]  bg-teal-300 `}
-              style={{ width: `${statusBar}%` }}
+              className={`m-1 h-[12px] bg-teal-300 `}
+              style={{ width: `${listStats.progress}%` }}
             ></div>
           </div>
           <div className="regular pb-[1px] text-sm">
-            <span>{activeNum}</span>
+            <span>{listStats.checkedNum}</span>
             <span>/</span>
-            <span>{resolvedNum}</span>
+            <span>{listStats.listLength}</span>
           </div>
         </div>
-      </div>
+      </li>
     </>
   );
 };
@@ -447,14 +421,10 @@ ListView.propTypes = {
 };
 ListItem.propTypes = {
   className: PropTypes.string,
-  handleOpenList: PropTypes.func.isRequired,
-  name: PropTypes.string.isRequired,
-  activeNum: PropTypes.number.isRequired,
-  resolvedNum: PropTypes.number.isRequired,
-  listLength: PropTypes.number.isRequired,
-  isEmpty: PropTypes.bool.isRequired,
-  toggleListMenu: PropTypes.func.isRequired,
+  list: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
+  toggleListMenu: PropTypes.func.isRequired,
+  toggleIsListOpen: PropTypes.func.isRequired,
 };
 ListMenu.propTypes = {
   className: PropTypes.string,
